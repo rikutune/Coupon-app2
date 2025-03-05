@@ -4,9 +4,8 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Store } from '../data/stores';
 
-// Replace with your actual Mapbox access token
-// You'll need to sign up at mapbox.com for a free token
-mapboxgl.accessToken = 'pk.eyJ1IjoicmVwbGFjZXdpdGh5b3VydG9rZW4iLCJhIjoiY2xyeXBlbmV3amRpIjozMnpobnRib290amRod2pyIn0.RxUmT07SFxTZvD0Krc6rWQ';
+// ここにあなたのMapboxアクセストークンを入れてください
+mapboxgl.accessToken = 'pk.eyJ1IjoicmlrdXR1bmUiLCJhIjoiY203dmpqYmpmMDBpNjJycTR5ZXhuOXc2MiJ9.nBnOIvvjuYaF-xcgb1_8Lg';
 
 interface MapProps {
   stores: Store[];
@@ -16,9 +15,9 @@ const Map: React.FC<MapProps> = ({ stores }) => {
   const navigate = useNavigate();
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [userLocation, setUserLocation] = useState<[number, number]>([139.7671, 35.6812]); // Tokyo Station default
+  const [userLocation, setUserLocation] = useState<[number, number]>([139.7671, 35.6812]); // 東京駅をデフォルトに
   
-  // Initialize map when component mounts
+  // コンポーネントがマウントされたときにマップを初期化
   useEffect(() => {
     if (mapContainer.current && !map.current) {
       map.current = new mapboxgl.Map({
@@ -26,15 +25,15 @@ const Map: React.FC<MapProps> = ({ stores }) => {
         style: 'mapbox://styles/mapbox/streets-v12',
         center: [userLocation[0], userLocation[1]],
         zoom: 12,
-        pitch: 45, // Add pitch for 3D effect
+        pitch: 45, // 3D効果のための角度設定
         bearing: 0,
-        antialias: true // Enables antialiasing for smoother rendering
+        antialias: true // 滑らかな描画のため
       });
 
-      // Add navigation controls
+      // ナビゲーションコントロールを追加
       map.current.addControl(new mapboxgl.NavigationControl());
       
-      // Try to get user location
+      // ユーザーの位置情報を取得
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
@@ -47,17 +46,17 @@ const Map: React.FC<MapProps> = ({ stores }) => {
             });
           },
           () => {
-            // Error or permission denied - keep default location
-            console.log('Unable to get location - using default');
+            // エラーまたは許可拒否の場合 - デフォルト位置を使用
+            console.log('位置情報が取得できません - デフォルト位置を使用します');
           }
         );
       }
 
-      // Enable 3D buildings
+      // 3D建物を有効にする
       map.current.on('load', () => {
         if (!map.current) return;
         
-        // Add 3D building layer
+        // 3D建物レイヤーを追加
         map.current.addLayer({
           'id': '3d-buildings',
           'source': 'composite',
@@ -81,9 +80,9 @@ const Map: React.FC<MapProps> = ({ stores }) => {
           }
         });
 
-        // Add markers for each store
+        // 各店舗のマーカーを追加
         stores.forEach(store => {
-          // Create a marker element
+          // マーカー要素を作成
           const el = document.createElement('div');
           el.className = 'marker';
           el.style.backgroundImage = 'url(https://docs.mapbox.com/mapbox-gl-js/assets/pin.png)';
@@ -92,7 +91,7 @@ const Map: React.FC<MapProps> = ({ stores }) => {
           el.style.backgroundSize = 'cover';
           el.style.cursor = 'pointer';
           
-          // Create a popup
+          // ポップアップを作成
           const popup = new mapboxgl.Popup({ offset: 25 })
             .setHTML(`
               <div class="text-center">
@@ -102,24 +101,24 @@ const Map: React.FC<MapProps> = ({ stores }) => {
                   class="mt-2 px-4 py-1 bg-blue-600 text-white rounded-full text-sm hover:bg-blue-700 view-details"
                   data-store-id="${store.id}"
                 >
-                  View Details
+                  詳細を見る
                 </button>
               </div>
             `);
 
-          // Add the marker to the map
+          // マーカーをマップに追加
           new mapboxgl.Marker(el)
-            .setLngLat([store.coordinates[1], store.coordinates[0]]) // Mapbox uses [lng, lat] order
+            .setLngLat([store.coordinates[1], store.coordinates[0]]) // Mapboxは[経度, 緯度]の順
             .setPopup(popup)
             .addTo(map.current!);
             
-          // Add click handler for the marker
+          // マーカーのクリックハンドラを追加
           el.addEventListener('click', () => {
             navigate(`/store/${store.id}`);
           });
         });
         
-        // Add click event for popup buttons
+        // ポップアップボタンのクリックイベントを追加
         map.current.getCanvas().addEventListener('click', (e) => {
           const target = e.target as HTMLElement;
           if (target.classList.contains('view-details')) {
@@ -130,18 +129,18 @@ const Map: React.FC<MapProps> = ({ stores }) => {
           }
         });
         
-        // Add click handler for the map itself
+        // マップ自体のクリックハンドラを追加
         map.current.on('click', (e) => {
-          // Find closest store to the click point
+          // クリックポイントに最も近い店舗を見つける
           const clickPoint = [e.lngLat.lng, e.lngLat.lat];
           let closestStore = null;
           let closestDistance = Infinity;
           
           stores.forEach(store => {
-            const storeLng = store.coordinates[1]; // Longitude
-            const storeLat = store.coordinates[0]; // Latitude
+            const storeLng = store.coordinates[1]; // 経度
+            const storeLat = store.coordinates[0]; // 緯度
             
-            // Simple distance calculation (this is not perfect but works for demo)
+            // 単純な距離計算（完璧ではないがデモとしては機能する）
             const distance = Math.sqrt(
               Math.pow(clickPoint[0] - storeLng, 2) + 
               Math.pow(clickPoint[1] - storeLat, 2)
@@ -153,7 +152,7 @@ const Map: React.FC<MapProps> = ({ stores }) => {
             }
           });
           
-          // If click is close enough to a store (threshold of 0.01 degree)
+          // クリックが店舗に十分近い場合（閾値0.01度）
           if (closestStore && closestDistance < 0.01) {
             navigate(`/store/${closestStore.id}`);
           }
@@ -161,7 +160,7 @@ const Map: React.FC<MapProps> = ({ stores }) => {
       });
     }
     
-    // Cleanup function
+    // クリーンアップ関数
     return () => {
       if (map.current) {
         map.current.remove();
@@ -170,79 +169,19 @@ const Map: React.FC<MapProps> = ({ stores }) => {
     };
   }, [stores, navigate]);
 
-  // Add user location marker when location changes
+  // ユーザー位置が変更されたらマーカーを追加
   useEffect(() => {
     if (!map.current) return;
     
-    // User location marker
+    // ユーザー位置マーカー
     const userMarker = new mapboxgl.Marker({
       color: '#3b82f6',
       scale: 1
     })
       .setLngLat([userLocation[0], userLocation[1]])
       .addTo(map.current);
-      
-    // Add pulsing effect
-    const pulsingDot = {
-      width: 100,
-      height: 100,
-      data: new Uint8Array(100 * 100 * 4),
-      
-      onAdd: function() {
-        const canvas = document.createElement('canvas');
-        canvas.width = this.width;
-        canvas.height = this.height;
-        this.context = canvas.getContext('2d');
-      },
-      
-      render: function() {
-        const duration = 1000;
-        const t = (performance.now() % duration) / duration;
-        
-        const radius = (this.width / 2) * 0.3;
-        const outerRadius = (this.width / 2) * 0.7 * t + radius;
-        const context = this.context;
-        
-        // Draw outer circle
-        context.clearRect(0, 0, this.width, this.height);
-        context.beginPath();
-        context.arc(
-          this.width / 2,
-          this.height / 2,
-          outerRadius,
-          0,
-          Math.PI * 2
-        );
-        context.fillStyle = `rgba(66, 133, 244, ${1 - t})`;
-        context.fill();
-        
-        // Draw inner circle
-        context.beginPath();
-        context.arc(
-          this.width / 2,
-          this.height / 2,
-          radius,
-          0,
-          Math.PI * 2
-        );
-        context.fillStyle = 'rgba(66, 133, 244, 1)';
-        context.strokeStyle = 'white';
-        context.lineWidth = 2 + 4 * (1 - t);
-        context.fill();
-        context.stroke();
-        
-        // Update this image's data with data from the canvas
-        this.data = context.getImageData(0, 0, this.width, this.height).data;
-        
-        // Continuously repaint until stop is called
-        map.current?.triggerRepaint();
-        
-        // Return `true` to let the map know that the image was updated
-        return true;
-      }
-    };
     
-    // Clean up
+    // クリーンアップ
     return () => {
       userMarker.remove();
     };
