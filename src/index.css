@@ -1,3 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+}
+
+.pulse-marker {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.slide-panel {
+  transition: transform 0.3s ease-in-out;
+}
+
+.slide-panel.closed {
+  transform: translateY(calc(100% - 40px));
+}
+
+.panel-handle {
+  width: 50px;
+  height: 5px;
+  background-color: #CBD5E1;
+  border-radius: 9999px;
+  margin: 8px auto;
+}
+
+.panel-handle-area {
+  cursor: grab;
+}
+
+.panel-handle-area:active {
+  cursor: grabbing;
+}
+
 /* Mapbox関連のスタイル */
 .mapboxgl-map {
   width: 100%;
@@ -51,4 +103,24 @@
 /* 3D建物のカスタマイズ */
 .mapboxgl-canvas-container.mapboxgl-interactive {
   cursor: pointer;
+}
+
+/* ユーザー位置のパルスアニメーション */
+@keyframes mapbox-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.user-location-pulse {
+  animation: mapbox-pulse 2s infinite;
 }
